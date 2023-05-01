@@ -5,7 +5,7 @@ import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.response.Jw
 
 import java.text.ParseException;
 
-public interface IAuthHandler {
+public interface AuthHandler {
     JwtResponseDto login(LoginRequestDto loginRequestDto);
     JwtResponseDto refresh(JwtResponseDto jwtResponseDto) throws ParseException;
 

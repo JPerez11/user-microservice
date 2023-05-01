@@ -2,7 +2,7 @@ package com.pragma.powerup.usermicroservice.adapters.driving.http.controller;
 
 import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.request.LoginRequestDto;
 import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.response.JwtResponseDto;
-import com.pragma.powerup.usermicroservice.adapters.driving.http.handlers.IAuthHandler;
+import com.pragma.powerup.usermicroservice.adapters.driving.http.handlers.AuthHandler;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.text.ParseException;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final IAuthHandler authHandler;
+    private final AuthHandler authHandler;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {

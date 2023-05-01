@@ -1,45 +1,46 @@
 package com.pragma.powerup.usermicroservice.domain.usecase;
 
-import com.pragma.powerup.usermicroservice.domain.api.IUserServicePort;
-import com.pragma.powerup.usermicroservice.domain.model.User;
-import com.pragma.powerup.usermicroservice.domain.spi.IUserPersistencePort;
+import com.pragma.powerup.usermicroservice.domain.api.UserServicePort;
+import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
+import com.pragma.powerup.usermicroservice.domain.model.UserModel;
+import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
 
 import java.util.List;
 
-public class UserUseCase implements IUserServicePort {
-    private final IUserPersistencePort userPersistencePort;
+/**
+ * @Author Jhoan Perez
+ * User Use Cases
+ */
+public class UserUseCase implements UserServicePort {
 
-    public UserUseCase(IUserPersistencePort userPersistencePort) {
+    // Persistence injection
+    private final UserPersistencePort userPersistencePort;
+
+    // Constructor to inject persistence
+    public UserUseCase(UserPersistencePort userPersistencePort) {
         this.userPersistencePort = userPersistencePort;
     }
 
     @Override
-    public void saveUser(User user) {
-        userPersistencePort.saveUser(user);
+    public void createUser(UserModel userModel) {
+        userPersistencePort.createUser(userModel);
     }
 
     @Override
-    public void deleteUser(User user) {
-        userPersistencePort.deleteUser(user);
+    public List<UserModel> getAllUsers(int page) {
+        List<UserModel> userModelList = userPersistencePort.getAllUsers(page);
+        if (userModelList.isEmpty()) {
+            throw new NoDataFoundException("Empty list");
+        }
+        return userModelList;
     }
 
     @Override
-    public List<User> getAllProviders(int page) {
-        return userPersistencePort.getAllProviders(page);
-    }
-
-    @Override
-    public User getProvider(Long id) {
-        return userPersistencePort.getProvider(id);
-    }
-
-    @Override
-    public User getEmployee(Long id) {
-        return userPersistencePort.getEmployee(id);
-    }
-
-    @Override
-    public User getClient(Long id) {
-        return userPersistencePort.getClient(id);
+    public UserModel getUserById(Long id) {
+        UserModel userModel = userPersistencePort.getUserById(id);
+        if (userModel == null) {
+            throw new NoDataFoundException("Empty list");
+        }
+        return userModel;
     }
 }

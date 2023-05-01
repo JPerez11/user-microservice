@@ -2,18 +2,18 @@ package com.pragma.powerup.usermicroservice.adapters.driving.http.dto.response;
 
 public class MessageResponseDto {
 
-    String mensaje;
+    String message;
 
-    public MessageResponseDto(String mensaje) {
-        this.mensaje = mensaje;
+    public MessageResponseDto(String message) {
+        this.message = message;
     }
 
-    public String getMensaje() {
-        return mensaje;
+    public String getMessage() {
+        return message;
     }
 
-    public void setMensaje(String mensaje) {
-        this.mensaje = mensaje;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 }

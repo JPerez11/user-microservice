@@ -1,86 +1,67 @@
 package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.adapter;
 
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.NoDataFoundException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.PersonNotFoundException;
+
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.RoleAuthentication;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotFoundException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserNotFoundException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.IPersonRepository;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.IRoleRepository;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.IUserRepository;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.IUserEntityMapper;
-import com.pragma.powerup.usermicroservice.domain.model.User;
-import com.pragma.powerup.usermicroservice.domain.spi.IUserPersistencePort;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.UserEntityMapper;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.RoleRepository;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.UserRepository;
+import com.pragma.powerup.usermicroservice.domain.model.UserModel;
+import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.pragma.powerup.usermicroservice.configuration.Constants.CLIENT_ROLE_ID;
-import static com.pragma.powerup.usermicroservice.configuration.Constants.EMPLOYEE_ROLE_ID;
+import static com.pragma.powerup.usermicroservice.configuration.Constants.ADMIN_ROLE_ID;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.MAX_PAGE_SIZE;
-import static com.pragma.powerup.usermicroservice.configuration.Constants.PROVIDER_ROLE_ID;
 
 @RequiredArgsConstructor
 @Transactional
-public class UserMysqlAdapter implements IUserPersistencePort {
-    private final IUserRepository userRepository;
-    private final IPersonRepository personRepository;
-    private final IRoleRepository roleRepository;
-    private final IUserEntityMapper userEntityMapper;
+public class UserMysqlAdapter implements UserPersistencePort {
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserEntityMapper userEntityMapper;
+    private final PasswordEncoder passwordEncoder;
+
     @Override
-    public void saveUser(User user) {
-        if (user.getRole().getId().equals(PROVIDER_ROLE_ID))
+    public void createUser(UserModel userModel) {
+        UserEntity userEntity = userEntityMapper.toUserEntity(userModel);
+        userEntity.setRoleEntity(RoleAuthentication.getRoleWithAuthentication(roleRepository));
+        if (userEntity.getRoleEntity().getId().equals(ADMIN_ROLE_ID))
         {
             throw new RoleNotAllowedForCreationException();
         }
-        if (userRepository.findByPersonEntityIdAndRoleEntityId(user.getPerson().getId(), user.getRole().getId()).isPresent()) {
+        if (userRepository.findByDocumentNumber(userEntity.getDocumentNumber()).isPresent()) {
             throw new UserAlreadyExistsException();
         }
-        personRepository.findById(user.getPerson().getId()).orElseThrow(PersonNotFoundException::new);
-        roleRepository.findById(user.getRole().getId()).orElseThrow(RoleNotFoundException::new);
-        userRepository.save(userEntityMapper.toEntity(user));
+
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        userRepository.save(userEntity);
+
     }
 
     @Override
-    public void deleteUser(User user) {
-        if (userRepository.findByPersonEntityIdAndRoleEntityId(user.getPerson().getId(), user.getRole().getId()).isPresent()) {
-            userRepository.deleteByPersonEntityIdAndRoleEntityId(user.getPerson().getId(), user.getRole().getId());
-        }
-        else {
+    public List<UserModel> getAllUsers(int page) {
+        Pageable pagination = PageRequest.of(page, MAX_PAGE_SIZE);
+        Page<UserEntity> userEntityList = userRepository.findAll(pagination);
+        if (userEntityList.isEmpty()) {
             throw new UserNotFoundException();
         }
+        return userEntityMapper.toUserModelList(userEntityList.getContent());
     }
 
     @Override
-    public List<User> getAllProviders(int page) {
-        Pageable pagination = PageRequest.of(page, MAX_PAGE_SIZE);
-        List<UserEntity> userEntityList = userRepository.findAllByRoleEntityId(PROVIDER_ROLE_ID, pagination);
-        if (userEntityList.isEmpty()) {
-            throw new NoDataFoundException();
-        }
-        return userEntityMapper.toUserList(userEntityList);
-    }
-
-    @Override
-    public User getProvider(Long id) {
-        UserEntity userEntity = userRepository.findByPersonEntityIdAndRoleEntityId(id, PROVIDER_ROLE_ID).orElseThrow(UserNotFoundException::new);
-        return userEntityMapper.toUser(userEntity);
-    }
-
-    @Override
-    public User getEmployee(Long id) {
-        UserEntity userEntity = userRepository.findByPersonEntityIdAndRoleEntityId(id, EMPLOYEE_ROLE_ID).orElseThrow(UserNotFoundException::new);
-        return userEntityMapper.toUser(userEntity);
-    }
-
-    @Override
-    public User getClient(Long id) {
-        UserEntity userEntity = userRepository.findByPersonEntityIdAndRoleEntityId(id, CLIENT_ROLE_ID).orElseThrow(UserNotFoundException::new);
-        return userEntityMapper.toUser(userEntity);
+    public UserModel getUserById(Long id) {
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        return userEntityMapper.toUserModel(userEntity);
     }
 }

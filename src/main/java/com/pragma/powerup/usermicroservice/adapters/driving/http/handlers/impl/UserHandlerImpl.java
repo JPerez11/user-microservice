@@ -1,11 +1,11 @@
 package com.pragma.powerup.usermicroservice.adapters.driving.http.handlers.impl;
 
 import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.request.UserRequestDto;
-import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.response.PersonResponseDto;
-import com.pragma.powerup.usermicroservice.adapters.driving.http.handlers.IUserHandler;
-import com.pragma.powerup.usermicroservice.adapters.driving.http.mapper.IPersonResponseMapper;
-import com.pragma.powerup.usermicroservice.adapters.driving.http.mapper.IUserRequestMapper;
-import com.pragma.powerup.usermicroservice.domain.api.IUserServicePort;
+import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.response.UserResponseDto;
+import com.pragma.powerup.usermicroservice.adapters.driving.http.handlers.UserHandler;
+import com.pragma.powerup.usermicroservice.adapters.driving.http.mapper.UserRequestMapper;
+import com.pragma.powerup.usermicroservice.adapters.driving.http.mapper.UserResponseMapper;
+import com.pragma.powerup.usermicroservice.domain.api.UserServicePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,39 +13,24 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserHandlerImpl implements IUserHandler {
+public class UserHandlerImpl implements UserHandler {
 
-    private final IUserServicePort userServicePort;
-    private final IUserRequestMapper userRequestMapper;
-    private final IPersonResponseMapper personResponseMapper;
+    private final UserServicePort userServicePort;
+    private final UserRequestMapper userRequestMapper;
+    private final UserResponseMapper userResponseMapper;
 
     @Override
-    public void saveUser(UserRequestDto userRequestDto) {
-        userServicePort.saveUser(userRequestMapper.toUser(userRequestDto));
+    public void createUser(UserRequestDto userRequestDto) {
+        userServicePort.createUser(userRequestMapper.toUserModel(userRequestDto));
     }
 
     @Override
-    public void deleteUser(UserRequestDto userRequestDto) {
-        userServicePort.deleteUser(userRequestMapper.toUser(userRequestDto));
+    public List<UserResponseDto> getAllUsers(int page) {
+        return userResponseMapper.toResponseDtoList(userServicePort.getAllUsers(page));
     }
 
     @Override
-    public List<PersonResponseDto> getProvider(Integer page) {
-        return personResponseMapper.userListToPersonResponseList(userServicePort.getAllProviders(page));
-    }
-
-    @Override
-    public PersonResponseDto getProvider(Long id) {
-        return personResponseMapper.userToPersonResponse(userServicePort.getProvider(id));
-    }
-
-    @Override
-    public PersonResponseDto getEmployee(Long id) {
-        return personResponseMapper.userToPersonResponse(userServicePort.getEmployee(id));
-    }
-
-    @Override
-    public PersonResponseDto getClient(Long id) {
-        return personResponseMapper.userToPersonResponse(userServicePort.getClient(id));
+    public UserResponseDto getUserById(Long id) {
+        return userResponseMapper.toUserResponseDto(userServicePort.getUserById(id));
     }
 }
