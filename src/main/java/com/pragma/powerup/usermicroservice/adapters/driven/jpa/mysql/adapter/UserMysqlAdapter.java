@@ -2,10 +2,12 @@ package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.adapter;
 
 
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.RoleAuthentication;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.validations.ValidateAge;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserNotFoundException;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserUnderAgeException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.UserEntityMapper;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.RoleRepository;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.UserRepository;
@@ -35,13 +37,16 @@ public class UserMysqlAdapter implements UserPersistencePort {
     @Override
     public void createUser(UserModel userModel) {
         UserEntity userEntity = userEntityMapper.toUserEntity(userModel);
+        if (ValidateAge.validateBirthDate(userEntity.getBirthdate())) {
+            throw new UserUnderAgeException();
+        }
+        if (userRepository.findByDocumentNumber(userEntity.getDocumentNumber()).isPresent()) {
+            throw new UserAlreadyExistsException();
+        }
         userEntity.setRoleEntity(RoleAuthentication.getRoleWithAuthentication(roleRepository));
         if (userEntity.getRoleEntity().getId().equals(ADMIN_ROLE_ID))
         {
             throw new RoleNotAllowedForCreationException();
-        }
-        if (userRepository.findByDocumentNumber(userEntity.getDocumentNumber()).isPresent()) {
-            throw new UserAlreadyExistsException();
         }
 
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));

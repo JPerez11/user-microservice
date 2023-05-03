@@ -2,6 +2,7 @@ package com.pragma.powerup.usermicroservice.adapters.driving.http.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -27,12 +28,16 @@ public class UserRequestDto {
     @NotBlank
     private String lastName;
     @NotBlank
+    @Pattern(regexp = "^\\d{10,14}$", message = "Document number can only contain numbers")
     private String documentNumber;
-    @NotBlank @Pattern(regexp = "^\\+?\\d+$", message = "Wrong phone format")
+    @NotBlank
+    @Pattern(regexp = "^\\+?\\d{10,13}$", message = "Wrong phone format")
     private String phoneNumber;
-    @NotBlank @Past
+    @NotNull
+    @Past(message = "Must be a past date")
     private LocalDate birthdate;
-    @NotBlank @Email
+    @NotBlank
+    @Email(message = "Must be a well-formed email address")
     private String email;
     @NotBlank
     private String password;

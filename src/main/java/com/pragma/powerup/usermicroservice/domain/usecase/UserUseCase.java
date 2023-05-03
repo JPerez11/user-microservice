@@ -1,11 +1,13 @@
 package com.pragma.powerup.usermicroservice.domain.usecase;
 
 import com.pragma.powerup.usermicroservice.domain.api.UserServicePort;
-import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
 
 import java.util.List;
+
+import static com.pragma.powerup.usermicroservice.domain.validations.UserValidation.userValidate;
 
 /**
  * @Author Jhoan Perez
@@ -23,6 +25,7 @@ public class UserUseCase implements UserServicePort {
 
     @Override
     public void createUser(UserModel userModel) {
+        userValidate(userModel);
         userPersistencePort.createUser(userModel);
     }
 
@@ -30,7 +33,7 @@ public class UserUseCase implements UserServicePort {
     public List<UserModel> getAllUsers(int page) {
         List<UserModel> userModelList = userPersistencePort.getAllUsers(page);
         if (userModelList.isEmpty()) {
-            throw new NoDataFoundException("Empty list");
+            throw new DomainException("Empty list");
         }
         return userModelList;
     }
@@ -39,7 +42,7 @@ public class UserUseCase implements UserServicePort {
     public UserModel getUserById(Long id) {
         UserModel userModel = userPersistencePort.getUserById(id);
         if (userModel == null) {
-            throw new NoDataFoundException("Empty list");
+            throw new DomainException("Empty list");
         }
         return userModel;
     }
