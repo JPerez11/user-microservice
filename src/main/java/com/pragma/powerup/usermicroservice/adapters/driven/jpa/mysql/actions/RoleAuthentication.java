@@ -1,13 +1,16 @@
 package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions;
 
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.RoleEntity;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotFoundException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.RoleRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.List;
+import static com.pragma.powerup.usermicroservice.configuration.Constants.ADMIN_ROLE;
+import static com.pragma.powerup.usermicroservice.configuration.Constants.EMPLOYEE_ROLE_ID;
+import static com.pragma.powerup.usermicroservice.configuration.Constants.OWNER_ROLE;
+import static com.pragma.powerup.usermicroservice.configuration.Constants.OWNER_ROLE_ID;
 
 /**
  * Class to determine the role based on the logged-in user.
@@ -21,27 +24,28 @@ public class RoleAuthentication {
      * @param roleRepository Repository to fetch the roles.
      */
     public static RoleEntity getRoleWithAuthentication(RoleRepository roleRepository) {
-        //Get the roles from database
-        List<RoleEntity> roleEntities = roleRepository.findAll();
-        //Get the session context
+        //Gets the session context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         //The role is extracted from the session
-        String role = authentication.getAuthorities()
+        String roleName = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .orElseThrow( () -> new UsernameNotFoundException("No exist rol on database."));
-        for (RoleEntity rol :
-                roleEntities) {
-            if (rol.getName().equalsIgnoreCase(role)) {
-                //Return the next role.
-                return roleRepository.findById(rol.getId() + 1)
-                        .orElseThrow(() -> new UsernameNotFoundException("No exist rol on database."));
-            } else if (rol.getName().equalsIgnoreCase("CUSTOMER")) {
-                return null;
-            }
-        }
-        return null;
+                .orElseThrow(RoleNotFoundException::new);
+        //Gets the id of the role by its name in session
+        Long idRole = provideRoleByName(roleName);
 
+        return roleRepository.findById(idRole).orElseThrow(RoleNotFoundException::new);
+
+    }
+
+    public static Long provideRoleByName(String roleName) {
+        Long idRole = 0L;
+        if (roleName.equalsIgnoreCase(ADMIN_ROLE)) {
+            idRole = OWNER_ROLE_ID;
+        } else if (roleName.equalsIgnoreCase(OWNER_ROLE)) {
+            idRole = EMPLOYEE_ROLE_ID;
+        }
+        return idRole;
     }
 }

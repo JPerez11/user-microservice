@@ -1,10 +1,14 @@
 package com.pragma.powerup.usermicroservice.domain.validations;
 
-import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.ValidationModelException;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,9 +16,12 @@ public class UserValidation {
 
     private static Pattern pattern;
     private static Matcher matcher;
+    private static Map<String, String> exceptionMap;
+    private static final String EMPTY_FIELD = "This field cannot empty";
+    private static final String FORMAT_INVALID = "The format is invalid";
     private static final String REGEX_EMAIL = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
-    private static final String REGEX_PHONE = "^\\+?\\d{10,12}$";
-    private static final String REGEX_DOCUMENT_NUMBER = "^\\+?\\d{10,13}$";
+    private static final String REGEX_PHONE_NUMBER = "^\\+?\\d{9,12}$";
+    private static final String REGEX_DOCUMENT_NUMBER = "^\\d{9,13}$";
     private static final LocalDate CURRENT_DATE = LocalDate.now();
 
     private UserValidation() {}
@@ -24,61 +31,64 @@ public class UserValidation {
      * @param userModel Instance userModel
      */
     public static void userValidate(UserModel userModel) {
-        if (emptyStringValidate(userModel.getFirstName())) {
-            throw new DomainException("The first name field cannot empty");
-        }
-        if (emptyStringValidate(userModel.getLastName())) {
-            throw new DomainException("The last name field cannot empty");
-        }
-        if (emptyStringValidate(userModel.getDocumentNumber())) {
-            throw new DomainException("The document number field cannot empty");
-        } else if (documentNumberValidate(userModel.getDocumentNumber())) {
-            throw new DomainException("The document field must be numeric");
-        }
-        if (emptyStringValidate(userModel.getPhoneNumber())) {
-            throw new DomainException("The phone number field cannot empty");
-        } else if (phoneNumberValidate(userModel.getPhoneNumber())) {
-            throw new DomainException("The phone format is invalid");
-        } else if (userModel.getPhoneNumber().length() < 13) {
-            throw new DomainException("The content of the phone must contain a maximum of 13 characters");
-        }
-        if (emptyStringValidate(userModel.getBirthdate().toString())) {
-            throw new DomainException("The birthdate field cannot empty");
-        } else if (birthdateValidate(userModel.getBirthdate())) {
-            throw new DomainException("The user must be of legal age");
-        }
-        if (emptyStringValidate(userModel.getEmail())) {
-            throw new DomainException("The field email cannot empty");
-        } else if (emailValidate(userModel.getEmail())) {
-            throw new DomainException("The mail format is invalid");
-        }
-        if (emptyStringValidate(userModel.getPassword())) {
-            throw new DomainException("The password field cannot empty");
+        exceptionMap = new HashMap<>();
+        // Validate data if empty
+        validateField(userModel.getFirstName(), "first name", EMPTY_FIELD, UserValidation::isStringEmpty);
+        validateField(userModel.getLastName(), "last name", EMPTY_FIELD, UserValidation::isStringEmpty);
+        validateField(userModel.getDocumentNumber(), "document", EMPTY_FIELD, UserValidation::isStringEmpty);
+        validateField(userModel.getPhoneNumber(), "phone", EMPTY_FIELD, UserValidation::isStringEmpty);
+        validateField(userModel.getBirthdate().toString(), "birthdate", EMPTY_FIELD,
+                UserValidation::isStringEmpty);
+        validateField(userModel.getPassword(), "password", EMPTY_FIELD, UserValidation::isStringEmpty);
+        validateField(userModel.getEmail(), "email", EMPTY_FIELD, UserValidation::isStringEmpty);
+        //Validate data if badly formatted
+        validateField(userModel.getDocumentNumber(), "document format", FORMAT_INVALID,
+                UserValidation::isDocumentValid);
+        validateField(userModel.getPhoneNumber(), "phone format", FORMAT_INVALID, UserValidation::isPhoneValid);
+        validateField(userModel.getBirthdate().toString(), "birthdate",
+                "The user cannot be a minor", UserValidation::isBirthdateValid);
+        validateField(userModel.getEmail(), "email format", FORMAT_INVALID, UserValidation::isEmailValid);
+
+        if (!exceptionMap.isEmpty()) {
+            throw new ValidationModelException(exceptionMap);
         }
 
+    }
+
+    private static void validateField(String field, String fieldName,
+                                      String errorMessage, Predicate<String> validator) {
+        if(validator.test(field)) {
+            exceptionMap.put(fieldName, String.format(errorMessage));
+        }
     }
 
     /**
      * Method to validate strings
      * @param data The string cannot empty
+     * @return true if string is empty
      */
-    private static boolean emptyStringValidate(String data) {
-        return data.isEmpty();
+    private static boolean isStringEmpty(String data) {
+        return data.trim().isEmpty();
     }
 
     /**
      * Method to validate email
      * @param email The email must be formatted
+     * @return true if format is invalid
      */
-    private static boolean emailValidate(String email) {
+    private static boolean isEmailValid(String email) {
         pattern = Pattern
                 .compile(REGEX_EMAIL);
         matcher = pattern.matcher(email);
-
         return !matcher.find();
     }
 
-    private static boolean documentNumberValidate(String document) {
+    /**
+     * Method to validate document
+     * @param document The document must be formatted
+     * @return true if format is invalid
+     */
+    private static boolean isDocumentValid(String document) {
         pattern = Pattern
                 .compile(REGEX_DOCUMENT_NUMBER);
         matcher = pattern.matcher(document);
@@ -88,20 +98,24 @@ public class UserValidation {
     /**
      * Method to validate phone
      * @param phone The phone must be formatted and not exceed the size
+     * @return true if format is invalid
      */
-    private static boolean phoneNumberValidate(String phone) {
+    private static boolean isPhoneValid(String phone) {
         pattern = Pattern
-                .compile(REGEX_PHONE);
+                .compile(REGEX_PHONE_NUMBER);
         matcher = pattern.matcher(phone);
         return !matcher.find();
     }
 
-    private static boolean birthdateValidate(LocalDate birthdate) {
-
-        Period period = Period.between(birthdate, CURRENT_DATE);
-
+    /**
+     * Method to validate birthdate
+     * @param birthdate Age must be over 18 years old
+     * @return true if age is less than 18
+     */
+    private static boolean isBirthdateValid(String birthdate) {
+        LocalDate date = LocalDate.parse(birthdate, DateTimeFormatter.ISO_LOCAL_DATE);
+        Period period = Period.between(date, CURRENT_DATE);
         return period.getYears() < 18;
-
     }
 
 }

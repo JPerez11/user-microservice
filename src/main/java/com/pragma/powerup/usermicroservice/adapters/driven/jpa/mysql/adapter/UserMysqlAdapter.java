@@ -1,7 +1,6 @@
 package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.adapter;
 
 
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.RoleAuthentication;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.validations.ValidateAge;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
@@ -22,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.RoleAuthentication.getRoleWithAuthentication;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.ADMIN_ROLE_ID;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.MAX_PAGE_SIZE;
 
@@ -43,7 +43,7 @@ public class UserMysqlAdapter implements UserPersistencePort {
         if (userRepository.findByDocumentNumber(userEntity.getDocumentNumber()).isPresent()) {
             throw new UserAlreadyExistsException();
         }
-        userEntity.setRoleEntity(RoleAuthentication.getRoleWithAuthentication(roleRepository));
+        userEntity.setRoleEntity(getRoleWithAuthentication(roleRepository));
         if (userEntity.getRoleEntity().getId().equals(ADMIN_ROLE_ID))
         {
             throw new RoleNotAllowedForCreationException();
