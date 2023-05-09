@@ -5,13 +5,13 @@ import com.pragma.powerup.usermicroservice.domain.exceptions.ValidationModelExce
 import com.pragma.powerup.usermicroservice.domain.model.RoleModel;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
+import com.pragma.powerup.usermicroservice.domain.usecase.factory.UserTestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,18 +32,7 @@ class UserUseCaseTest {
     @Test
     void shouldCreateUser() {
         //Given
-        RoleModel roleModel = new RoleModel(1L, "ADMIN", "PLACE MANAGER");
-        UserModel userModel = new UserModel(1L,
-                "Name",
-                "LastName",
-                "1234567890",
-                "+1234567890",
-                LocalDate.of(2000, 1, 1),
-                "test@gmail.com",
-                "12345",
-                roleModel);
-
-
+        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
 
         //When
         doNothing().when(userPersistencePort).createUser(userModel);
@@ -54,21 +43,11 @@ class UserUseCaseTest {
     }
 
     @Test
-    void shouldThrowException() {
+    void shouldThrowValidationModelException() {
         //Given
-        RoleModel roleModel = new RoleModel(1L, "ADMIN", "PLACE MANAGER");
-        UserModel userModel = new UserModel(1L,
-                "",
-                "",
-                "",
-                "",
-                LocalDate.of(2000, 1, 1),
-                "test@.com",
-                "",
-                roleModel);
+        UserModel userModel = UserTestDataFactory.getUserModelEmpty();
 
         //When
-
 
         //Then
         assertThrows(ValidationModelException.class, () -> {
@@ -79,21 +58,7 @@ class UserUseCaseTest {
     @Test
     void shouldGetUserById() {
         //Given
-        RoleModel roleModel = new RoleModel();
-        roleModel.setId(1L);
-        roleModel.setRoleName("ADMIN");
-        roleModel.setDescription("PLACE MANAGER");
-
-        UserModel userModel = new UserModel();
-        userModel.setId(1L);
-        userModel.setFirstName("Admin");
-        userModel.setLastName("Admin");
-        userModel.setDocumentNumber("12345");
-        userModel.setPhoneNumber("+57123456");
-        userModel.setEmail("admin@gmail.com");
-        userModel.setPassword("admin123");
-        userModel.setBirthdate(LocalDate.of(2000, 1, 1));
-        userModel.setRoleModel(roleModel);
+        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
 
         //When
         when(userPersistencePort.getUserById(1L)).thenReturn(userModel);
@@ -110,31 +75,9 @@ class UserUseCaseTest {
     @Test
     void shouldGetAllUsers() {
         //Given
-        RoleModel roleModel = new RoleModel();
-        roleModel.setId(1L);
-        roleModel.setRoleName("ADMIN");
-        roleModel.setDescription("PLACE MANAGER");
-
-        UserModel userModel1 = new UserModel();
-        userModel1.setId(1L);
-        userModel1.setFirstName("Admin");
-        userModel1.setLastName("Admin");
-        userModel1.setDocumentNumber("1234567890");
-        userModel1.setPhoneNumber("+571234567890");
-        userModel1.setEmail("admin@gmail.com");
-        userModel1.setPassword("admin123");
-        userModel1.setBirthdate(LocalDate.of(2000, 1, 1));
-        userModel1.setRoleModel(roleModel);
-
-        UserModel userModel2 = new UserModel(2L,
-                "Name",
-                "LastName",
-                "1234567890",
-                "1234567890",
-                LocalDate.of(2000, 1, 1),
-                "test@gmail.com",
-                "12345",
-                roleModel);
+        RoleModel roleModel = UserTestDataFactory.getRoleModelWithSetters();
+        UserModel userModel1 = UserTestDataFactory.getUserModelWithSetters();
+        UserModel userModel2 = UserTestDataFactory.getOtherUserModelWithSetters();
 
         List<UserModel> userModelList = new ArrayList<>();
         userModelList.add(userModel1);
