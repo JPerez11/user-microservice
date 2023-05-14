@@ -23,23 +23,23 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UserRequestDto {
 
-    @NotBlank
+    @NotBlank(message = "First name must not be empty")
     private String firstName;
-    @NotBlank
+    @NotBlank(message = "Last name must not be empty")
     private String lastName;
-    @NotBlank
-    @Pattern(regexp = "^\\d{10,14}$", message = "Document number can only contain numbers")
+    @NotBlank(message = "DNI must not be empty")
+    @Pattern(regexp = "^\\d{9,13}$", message = "Document number can only contain numbers")
     private String documentNumber;
-    @NotBlank
-    @Pattern(regexp = "^\\+?\\d{10,13}$", message = "Wrong phone format")
+    @NotBlank(message = "Phone number must not be empty")
+    @Pattern(regexp = "^\\+?\\d{9,12}$", message = "Wrong phone format")
     private String phoneNumber;
-    @NotNull
+    @NotNull(message = "Birthdate must not be empty")
     @Past(message = "Must be a past date")
     private LocalDate birthdate;
-    @NotBlank
+    @NotBlank(message = "Email must not be empty")
     @Email(message = "Must be a well-formed email address")
     private String email;
-    @NotBlank
+    @NotBlank(message = "Password must not be empty")
     private String password;
 
 }

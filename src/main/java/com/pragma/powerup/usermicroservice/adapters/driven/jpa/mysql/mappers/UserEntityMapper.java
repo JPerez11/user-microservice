@@ -3,6 +3,7 @@ package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public interface UserEntityMapper {
 
     UserEntity toUserEntity(UserModel userModel);
 
+    @Mapping(target = "roleModel", source = "roleEntity")
     UserModel toUserModel(UserEntity userEntity);
 
     List<UserModel> toUserModelList(List<UserEntity> userEntityList);

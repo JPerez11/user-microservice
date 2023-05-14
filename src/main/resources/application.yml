@@ -1,3 +1,5 @@
 spring:
+  application:
+    name: user-microservice
   profiles:
     active: dev

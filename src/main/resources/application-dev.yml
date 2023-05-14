@@ -2,6 +2,8 @@ server:
   port: 8090
 
 spring:
+  application:
+    name: user-microservice
   datasource:
     url: jdbc:mysql://localhost:3306/users_microservice
     username: root

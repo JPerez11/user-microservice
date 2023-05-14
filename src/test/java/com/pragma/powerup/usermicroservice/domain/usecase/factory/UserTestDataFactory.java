@@ -11,7 +11,7 @@ public class UserTestDataFactory {
         RoleModel roleModel = new RoleModel();
 
         roleModel.setId(1L);
-        roleModel.setRoleName("ADMIN");
+        roleModel.setName("ADMIN");
         roleModel.setDescription("PLACE MANAGER");
         return  roleModel;
     }

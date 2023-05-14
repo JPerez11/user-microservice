@@ -11,6 +11,7 @@ import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.ValidationModelException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -106,5 +107,12 @@ public class ControllerAdvisor {
             ValidationModelException domainException) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, domainException.getException()));
+    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> httpMessageNotReadableException(
+            HttpMessageNotReadableException httpMessageNotReadableException) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY,
+                        httpMessageNotReadableException.getMessage()));
     }
 }

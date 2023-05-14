@@ -10,7 +10,7 @@ public class RoleModel {
      * Role class attributes
      */
     private Long id;
-    private String roleName;
+    private String name;
     private String description;
 
     /**
@@ -22,12 +22,12 @@ public class RoleModel {
     /**
      * Constructor with all parameters
      * @param id is the identifier
-     * @param roleName is the name
+     * @param name is the name
      * @param description is the description
      */
-    public RoleModel(Long id, String roleName, String description) {
+    public RoleModel(Long id, String name, String description) {
         this.id = id;
-        this.roleName = roleName;
+        this.name = name;
         this.description = description;
     }
 
@@ -42,12 +42,12 @@ public class RoleModel {
         this.id = id;
     }
 
-    public String getRoleName() {
-        return roleName;
+    public String getName() {
+        return name;
     }
 
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {

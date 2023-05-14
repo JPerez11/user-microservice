@@ -103,7 +103,7 @@ class UserUseCaseTest {
         });
 
         assertEquals(roleModel.getId(), result.get(1).getRoleModel().getId());
-        assertEquals(roleModel.getRoleName(), result.get(1).getRoleModel().getRoleName());
+        assertEquals(roleModel.getName(), result.get(1).getRoleModel().getName());
         assertEquals(roleModel.getDescription(), result.get(1).getRoleModel().getDescription());
 
         //Verify

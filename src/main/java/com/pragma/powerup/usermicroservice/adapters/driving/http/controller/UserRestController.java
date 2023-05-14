@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,8 +33,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "jwt")
 public class UserRestController {
+
     private final UserHandler userHandler;
 
+    @Secured({"ADMIN", "OWNER"})
     @Operation(summary = "Add a new user",
             responses = {
                     @ApiResponse(responseCode = "201", description = "User created",
@@ -48,13 +51,13 @@ public class UserRestController {
                     @ApiResponse(responseCode = "403", description = "Role not allowed for user creation",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(ref = "#/components/schemas/Error")))})
-    @PostMapping("")
+    @PostMapping("/")
     public ResponseEntity<Map<String, String>> createUser(@Valid @RequestBody UserRequestDto userRequestDto) {
         userHandler.createUser(userRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.USER_CREATED_MESSAGE));
     }
-
+    @Secured({"ADMIN"})
     @Operation(summary = "Get all users",
             responses = {
                     @ApiResponse(responseCode = "200", description = "All users returned",
@@ -63,11 +66,12 @@ public class UserRestController {
                     @ApiResponse(responseCode = "404", description = "No data found",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(ref = "#/components/schemas/Error")))})
-    @GetMapping("/")
+    @GetMapping("/all")
     public ResponseEntity<List<UserResponseDto>> getAllUsers(
             @Parameter(description = "Number of the page to list providers") @RequestParam int page) {
         return ResponseEntity.ok(userHandler.getAllUsers(page));
     }
+    @Secured({"ADMIN"})
     @Operation(summary = "Get a user",
             responses = {
                     @ApiResponse(responseCode = "200", description = "User returned",
