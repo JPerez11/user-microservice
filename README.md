@@ -2,7 +2,7 @@
 <div align="center">
 <h3 align="center">PRAGMA POWER-UP</h3>
   <p align="center">
-    In this challenge you are going to design the backend of a system that centralizes the services and orders of a restaurant chain that has different branches in the city.
+    In this challenge, the backend of a system that centralizes the services and orders of a restaurant chain that has different branches in the city is designed. Specifically, This microservice focuses on the management of users, roles and login.
   </p>
 </div>
 
@@ -34,20 +34,20 @@ To get a local copy up and running follow these steps.
 1. Clone the repository
 2. Change directory
    ```sh
-   cd power-up-arquetipo-v3
+   cd user-microservice
    ```
-3. Create a new database in MySQL called powerup
-4. Update the database connection settings
+3. Create a new database in MySQL called user_microservice
+4. Update the database connection settings (If necessary, change the localhost port if you have another port for MySQL)
    ```yml
    # src/main/resources/application-dev.yml
    spring:
       datasource:
-          url: jdbc:mysql://localhost/powerup
+          url: jdbc:mysql://localhost:3306/user_microservice
           username: root
           password: <your-password>
    ```
 5. After the tables are created execute src/main/resources/data.sql content to populate the database
-6. Open Swagger UI and search the /auth/login endpoint and login with userDni: 123, password: 1234
+6. Open Swagger UI and search the /auth/login endpoint and login with userEmail: admin@gmail.com, password: admin123
 
 <!-- USAGE -->
 ## Usage
