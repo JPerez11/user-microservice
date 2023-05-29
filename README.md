@@ -49,6 +49,13 @@ To get a local copy up and running follow these steps.
 5. After the tables are created execute src/main/resources/data.sql content to populate the database
 6. Open Swagger UI and search the /auth/login endpoint and login with userEmail: admin@gmail.com, password: admin123
 
+### User managment
+Following the business logic, an administrator creates an owner; an owner can create an employee; An employee cannot create any users and the customer must register for the customer role.
+* ADMIN ROLE --> Is created by database
+* OWNER ROLE --> Is created by ADMIN
+* EMPLOYEE ROLE --> Is created by OWNER
+* CUSTMER ROLE --> Is created by register form
+
 <!-- USAGE -->
 ## Usage
 
