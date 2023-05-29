@@ -46,4 +46,10 @@ public class UserUseCase implements UserServicePort {
         }
         return userModel;
     }
+
+    @Override
+    public void registerUser(UserModel userModel) {
+        userValidate(userModel);
+        userPersistencePort.registerUser(userModel);
+    }
 }

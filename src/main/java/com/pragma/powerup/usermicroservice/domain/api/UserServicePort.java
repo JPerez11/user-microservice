@@ -16,5 +16,6 @@ public interface UserServicePort {
     List<UserModel> getAllUsers(int page);
     // Method to get one user by id
     UserModel getUserById(Long id);
-
+    //Method to register a new customer
+    void registerUser(UserModel userModel);
 }

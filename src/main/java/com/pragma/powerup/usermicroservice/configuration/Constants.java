@@ -12,8 +12,8 @@ public class Constants {
     public static final String OWNER_ROLE = "OWNER";
     public static final Long EMPLOYEE_ROLE_ID = 3L;
     public static final String EMPLOYEE_ROLE = "EMPLOYEE";
-    public static final Long CLIENT_ROLE_ID = 4L;
-    public static final String CLIENT_ROLE = "CLIENT";
+    public static final Long CUSTOMER_ROLE_ID = 4L;
+    public static final String CUSTOMER_ROLE = "CUSTOMER";
     public static final int MAX_PAGE_SIZE = 10;
     public static final String RESPONSE_MESSAGE_KEY = "message";
     public static final String RESPONSE_ERROR_MESSAGE_KEY = "error";

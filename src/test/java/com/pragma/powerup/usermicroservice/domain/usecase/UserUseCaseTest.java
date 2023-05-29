@@ -73,6 +73,20 @@ class UserUseCaseTest {
     }
 
     @Test
+    void shouldRegisterUser() {
+        //Given
+        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+
+        //When
+        doNothing().when(userPersistencePort).registerUser(userModel);
+        userUseCase.registerUser(userModel);
+
+        //Then
+        verify(userPersistencePort).registerUser(userModel);
+    }
+
+
+    @Test
     void shouldGetAllUsers() {
         //Given
         RoleModel roleModel = UserTestDataFactory.getRoleModelWithSetters();

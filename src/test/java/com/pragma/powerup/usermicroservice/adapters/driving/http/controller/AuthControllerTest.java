@@ -1,9 +1,12 @@
 package com.pragma.powerup.usermicroservice.adapters.driving.http.controller;
 
 import com.pragma.powerup.usermicroservice.adapters.driving.http.controller.factory.AuthControllerTestDataFactory;
+import com.pragma.powerup.usermicroservice.adapters.driving.http.controller.factory.UserControllerTestDataFactory;
 import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.request.LoginRequestDto;
+import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.request.UserRequestDto;
 import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.response.JwtResponseDto;
 import com.pragma.powerup.usermicroservice.adapters.driving.http.handlers.AuthHandler;
+import com.pragma.powerup.usermicroservice.configuration.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -70,6 +74,22 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(AuthControllerTestDataFactory.asJsonString(jwtResponseDto)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldRegisterUser() throws Exception {
+        //Given
+        UserRequestDto userRequestDto =
+                UserControllerTestDataFactory.getUserRequest();
+
+        //When
+
+        mockMvc.perform(post("/auth/register")
+                        .content(AuthControllerTestDataFactory
+                                .asJsonString(userRequestDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.message").value(Constants.USER_CREATED_MESSAGE));
     }
 
 }

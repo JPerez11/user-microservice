@@ -53,8 +53,8 @@ public class MainSecurity {
                 .httpBasic().disable()
                 .authorizeHttpRequests(auth ->
                         auth
-                            .requestMatchers("/auth/login", "/swagger-ui.html", "/swagger-ui/**",
-                                    "/v3/api-docs/**", "/actuator/health")
+                            .requestMatchers("/auth/login", "/auth/register", "/swagger-ui.html",
+                                    "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health")
                                 .permitAll()
                             .anyRequest()
                                 .authenticated()

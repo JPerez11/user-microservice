@@ -2,6 +2,7 @@ package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.adapter;
 
 
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.validations.ValidateAge;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.RoleEntity;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserAlreadyExistsException;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import static com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.RoleAuthentication.getRoleWithAuthentication;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.ADMIN_ROLE_ID;
+import static com.pragma.powerup.usermicroservice.configuration.Constants.CUSTOMER_ROLE_ID;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.MAX_PAGE_SIZE;
 
 @RequiredArgsConstructor
@@ -68,5 +70,27 @@ public class UserMysqlAdapter implements UserPersistencePort {
     public UserModel getUserById(Long id) {
         UserEntity userEntity = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         return userEntityMapper.toUserModel(userEntity);
+    }
+
+    @Override
+    public void registerUser(UserModel userModel) {
+        UserEntity userEntity = userEntityMapper.toUserEntity(userModel);
+        if (ValidateAge.validateBirthDate(userEntity.getBirthdate())) {
+            throw new UserUnderAgeException();
+        }
+        if (userRepository.findByDocumentNumber(userEntity.getDocumentNumber()).isPresent()) {
+            throw new UserAlreadyExistsException();
+        }
+        RoleEntity role = new RoleEntity();
+        role.setId(CUSTOMER_ROLE_ID);
+        userEntity.setRoleEntity(role);
+
+        if (userEntity.getRoleEntity().getId().equals(ADMIN_ROLE_ID))
+        {
+            throw new RoleNotAllowedForCreationException();
+        }
+
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        userRepository.save(userEntity);
     }
 }

@@ -1,6 +1,9 @@
 package com.pragma.powerup.usermicroservice.adapters.driving.http.controller.factory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.request.LoginRequestDto;
 import com.pragma.powerup.usermicroservice.adapters.driving.http.dto.response.JwtResponseDto;
 import io.jsonwebtoken.Claims;
@@ -36,12 +39,10 @@ public class AuthControllerTestDataFactory {
                 .compact();
     }
 
-    public static String asJsonString(Object object) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(object);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public static String asJsonString(Object object) throws JsonProcessingException {
+        ObjectMapper objectMapper = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .build();
+        return objectMapper.writeValueAsString(object);
     }
 }
