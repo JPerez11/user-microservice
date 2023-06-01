@@ -1,10 +1,5 @@
 package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.adapter;
 
-
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.RoleEntity;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.RoleEntityMapper;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.UserEntityMapper;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.RoleRepository;
@@ -21,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.RoleAuthentication.getRoleWithAuthentication;
-import static com.pragma.powerup.usermicroservice.configuration.Constants.ADMIN_ROLE_ID;
-import static com.pragma.powerup.usermicroservice.configuration.Constants.CUSTOMER_ROLE_ID;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.MAX_PAGE_SIZE;
 
 @RequiredArgsConstructor
@@ -53,26 +46,17 @@ public class UserMysqlAdapter implements UserPersistencePort {
 
     @Override
     public void registerUser(UserModel userModel) {
-        UserEntity userEntity = userEntityMapper.toUserEntity(userModel);
-        if (userRepository.findByDocumentNumber(userEntity.getDocumentNumber()).isPresent()) {
-            throw new UserAlreadyExistsException();
-        }
-        RoleEntity role = new RoleEntity();
-        role.setId(CUSTOMER_ROLE_ID);
-        userEntity.setRoleEntity(role);
-
-        if (userEntity.getRoleEntity().getId().equals(ADMIN_ROLE_ID))
-        {
-            throw new RoleNotAllowedForCreationException();
-        }
-
-        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
-        userRepository.save(userEntity);
+        userRepository.save(userEntityMapper.toUserEntity(userModel));
     }
 
     @Override
     public boolean userAlreadyExists(String documentNumber) {
         return userRepository.existsByDocumentNumber(documentNumber);
+    }
+
+    @Override
+    public boolean mailAlreadyExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     @Override

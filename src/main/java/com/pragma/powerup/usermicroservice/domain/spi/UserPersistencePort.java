@@ -21,6 +21,7 @@ public interface UserPersistencePort {
     void registerUser(UserModel userModel);
     // Method to valid exception
     boolean userAlreadyExists(String documentNumber);
+    boolean mailAlreadyExists(String email);
     // Method to get role
     RoleModel getRole();
     // Method to get password encrypt

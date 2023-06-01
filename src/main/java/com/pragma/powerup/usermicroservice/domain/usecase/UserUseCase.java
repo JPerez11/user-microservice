@@ -1,16 +1,19 @@
 package com.pragma.powerup.usermicroservice.domain.usecase;
 
 import com.pragma.powerup.usermicroservice.domain.api.UserServicePort;
+import com.pragma.powerup.usermicroservice.domain.exceptions.MailAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserNotFoundException;
+import com.pragma.powerup.usermicroservice.domain.model.RoleModel;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
 
 import java.util.List;
 
 import static com.pragma.powerup.usermicroservice.configuration.Constants.ADMIN_ROLE_ID;
+import static com.pragma.powerup.usermicroservice.configuration.Constants.CUSTOMER_ROLE_ID;
 import static com.pragma.powerup.usermicroservice.domain.validations.UserValidation.userValidate;
 
 /**
@@ -67,7 +70,20 @@ public class UserUseCase implements UserServicePort {
 
     @Override
     public void registerUser(UserModel userModel) {
+        if (userModel == null) {
+            throw new NullPointerException();
+        }
         userValidate(userModel);
+        if (userPersistencePort.userAlreadyExists(userModel.getDocumentNumber())) {
+            throw new UserAlreadyExistsException();
+        }
+        if (userPersistencePort.mailAlreadyExists(userModel.getEmail())) {
+            throw new MailAlreadyExistsException();
+        }
+        RoleModel roleModel = new RoleModel();
+        roleModel.setId(CUSTOMER_ROLE_ID);
+        userModel.setRoleModel(roleModel);
+        userModel.setPassword(userPersistencePort.getPasswordEncrypt(userModel.getPassword()));
         userPersistencePort.registerUser(userModel);
     }
 }

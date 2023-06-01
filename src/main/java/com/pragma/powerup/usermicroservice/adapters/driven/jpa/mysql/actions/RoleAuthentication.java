@@ -1,7 +1,6 @@
 package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions;
 
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.RoleEntity;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotFoundException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.RoleRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,12 +30,12 @@ public class RoleAuthentication {
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .orElseThrow(RoleNotFoundException::new);
+                .orElse(null);
         //Gets the id of the role by its name in session
+        assert roleName != null;
         Long idRole = provideRoleByName(roleName);
 
-        return roleRepository.findById(idRole).orElseThrow(RoleNotFoundException::new);
-
+        return roleRepository.findById(idRole).orElse(null);
     }
 
     public static Long provideRoleByName(String roleName) {

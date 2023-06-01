@@ -1,6 +1,6 @@
 package com.pragma.powerup.usermicroservice.domain.usecase;
 
-import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.MailAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
@@ -22,10 +22,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class UserUseCaseTest {
@@ -39,7 +35,7 @@ class UserUseCaseTest {
     @Test
     void shouldCreateUser() {
         //Given
-        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+        UserModel userModel = UserTestDataFactory.getUserOwnerWithSetters();
         RoleModel roleModel = UserTestDataFactory.getRoleOwnerWithSetters();
         String passwordEncrypted = "$2a$10$G.2DHaPhPXfVzh/bn71KruzG/13XPjfwP6pRVOjeBGGCAEL0CU51W";
 
@@ -51,11 +47,11 @@ class UserUseCaseTest {
         Mockito.when(userPersistencePort.getPasswordEncrypt(userModel.getPassword()))
                 .thenReturn(passwordEncrypted);
         userModel.setPassword(passwordEncrypted);
-        doNothing().when(userPersistencePort).createUser(userModel);
+        Mockito.doNothing().when(userPersistencePort).createUser(userModel);
         userUseCase.createUser(userModel);
 
         //Then
-        verify(userPersistencePort).createUser(userModel);
+        Mockito.verify(userPersistencePort).createUser(userModel);
     }
 
     @Test
@@ -82,7 +78,7 @@ class UserUseCaseTest {
     @Test
     void shouldThrowUserAlreadyExistsException() {
         //Given
-        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+        UserModel userModel = UserTestDataFactory.getUserAdminWithSetters();
 
         //When
         Mockito.when(userPersistencePort.userAlreadyExists(userModel.getDocumentNumber()))
@@ -97,7 +93,7 @@ class UserUseCaseTest {
     @Test
     void shouldThrowRoleNotAllowedForCreationException() {
         //Given
-        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+        UserModel userModel = UserTestDataFactory.getUserAdminWithSetters();
         RoleModel roleModel = UserTestDataFactory.getRoleAdminWithSetters();
 
         //When
@@ -116,7 +112,7 @@ class UserUseCaseTest {
     void shouldGetAllUsers() {
         //Given
         RoleModel roleModel = UserTestDataFactory.getRoleAdminWithSetters();
-        UserModel userModel1 = UserTestDataFactory.getUserModelWithSetters();
+        UserModel userModel1 = UserTestDataFactory.getUserAdminWithSetters();
         UserModel userModel2 = UserTestDataFactory.getOtherUserModelWithSetters();
 
         List<UserModel> userModelList = new ArrayList<>();
@@ -162,7 +158,7 @@ class UserUseCaseTest {
     @Test
     void shouldGetUserById() {
         //Given
-        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+        UserModel userModel = UserTestDataFactory.getUserAdminWithSetters();
 
         //When
         Mockito.when(userPersistencePort.getUserById(1L)).thenReturn(userModel);
@@ -187,14 +183,72 @@ class UserUseCaseTest {
     @Test
     void shouldRegisterUser() {
         //Given
-        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+        UserModel userModel = UserTestDataFactory.getUserCustomerWithSetters();
+        RoleModel roleModel = UserTestDataFactory.getRoleCustomerWithSetters();
+        String passwordEncrypted = "$2a$10$G.2DHaPhPXfVzh/bn71KruzG/13XPjfwP6pRVOjeBGGCAEL0CU51W";
 
         //When
-        doNothing().when(userPersistencePort).registerUser(userModel);
+        Mockito.when(userPersistencePort.userAlreadyExists(userModel.getDocumentNumber()))
+                .thenReturn(false);
+        userModel.setRoleModel(roleModel);
+        Mockito.when(userPersistencePort.mailAlreadyExists(userModel.getEmail()))
+                .thenReturn(false);
+        Mockito.when(userPersistencePort.getPasswordEncrypt(userModel.getPassword()))
+                .thenReturn(passwordEncrypted);
+        userModel.setPassword(passwordEncrypted);
+        Mockito.doNothing().when(userPersistencePort).registerUser(userModel);
         userUseCase.registerUser(userModel);
 
         //Then
-        verify(userPersistencePort).registerUser(userModel);
+        Mockito.verify(userPersistencePort).registerUser(userModel);
+    }
+
+    @Test
+    void shouldThrowNullPointerExceptionInRegisterUser() {
+        //Then
+        assertThrows(NullPointerException.class, () -> {
+            userUseCase.registerUser(null);
+        });
+    }
+
+    @Test
+    void shouldThrowValidationModelExceptionInRegisterUser() {
+        //Given
+        UserModel userModel = UserTestDataFactory.getUserModelEmpty();
+
+        //Then
+        assertThrows(ValidationModelException.class, () -> {
+            userUseCase.registerUser(userModel);
+        });
+    }
+
+    @Test
+    void shouldThrowUserAlreadyExistsExceptionInRegisterUser() {
+        //Given
+        UserModel userModel = UserTestDataFactory.getUserAdminWithSetters();
+
+        //When
+        Mockito.when(userPersistencePort.userAlreadyExists(userModel.getDocumentNumber()))
+                .thenReturn(true);
+
+        //Then
+        assertThrows(UserAlreadyExistsException.class, () -> {
+            userUseCase.registerUser(userModel);
+        });
+    }
+    @Test
+    void shouldThrowMailAlreadyExistsExceptionInRegisterUser() {
+        //Given
+        UserModel userModel = UserTestDataFactory.getUserAdminWithSetters();
+
+        //When
+        Mockito.when(userPersistencePort.mailAlreadyExists(userModel.getEmail()))
+                .thenReturn(true);
+
+        //Then
+        assertThrows(MailAlreadyExistsException.class, () -> {
+            userUseCase.registerUser(userModel);
+        });
     }
 
 }
