@@ -5,7 +5,6 @@ import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.Role
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserAlreadyExistsException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserNotFoundException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.RoleEntityMapper;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.UserEntityMapper;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.RoleRepository;
@@ -14,7 +13,6 @@ import com.pragma.powerup.usermicroservice.domain.model.RoleModel;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,17 +43,12 @@ public class UserMysqlAdapter implements UserPersistencePort {
     @Override
     public List<UserModel> getAllUsers(int page) {
         Pageable pagination = PageRequest.of(page, MAX_PAGE_SIZE);
-        Page<UserEntity> userEntityList = userRepository.findAll(pagination);
-        if (userEntityList.isEmpty()) {
-            throw new UserNotFoundException();
-        }
-        return userEntityMapper.toUserModelList(userEntityList.getContent());
+        return userEntityMapper.toUserModelList(userRepository.findAll(pagination).getContent());
     }
 
     @Override
     public UserModel getUserById(Long id) {
-        UserEntity userEntity = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        return userEntityMapper.toUserModel(userEntity);
+        return userEntityMapper.toUserModel(userRepository.findById(id).orElse(null));
     }
 
     @Override

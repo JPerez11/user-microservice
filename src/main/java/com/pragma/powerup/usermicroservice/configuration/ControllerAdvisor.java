@@ -1,11 +1,11 @@
 package com.pragma.powerup.usermicroservice.configuration;
 
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.MailAlreadyExistsException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.NoDataFoundException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotFoundException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserAlreadyExistsException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserNotFoundException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.MailAlreadyExistsException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotAllowedForCreationException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotFoundException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.UserNotFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.ValidationModelException;
 import org.springframework.http.HttpStatus;

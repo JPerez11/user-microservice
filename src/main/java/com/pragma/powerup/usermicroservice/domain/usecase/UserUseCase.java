@@ -2,8 +2,9 @@ package com.pragma.powerup.usermicroservice.domain.usecase;
 
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.domain.api.UserServicePort;
-import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.UserNotFoundException;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
 
@@ -48,18 +49,18 @@ public class UserUseCase implements UserServicePort {
 
     @Override
     public List<UserModel> getAllUsers(int page) {
-        List<UserModel> userModelList = userPersistencePort.getAllUsers(page);
-        if (userModelList.isEmpty()) {
-            throw new DomainException("Empty list");
+        List<UserModel> list = userPersistencePort.getAllUsers(page);
+        if (list.isEmpty()) {
+            throw new NoDataFoundException();
         }
-        return userModelList;
+        return list;
     }
 
     @Override
     public UserModel getUserById(Long id) {
         UserModel userModel = userPersistencePort.getUserById(id);
         if (userModel == null) {
-            throw new DomainException("Empty list");
+            throw new UserNotFoundException();
         }
         return userModel;
     }
