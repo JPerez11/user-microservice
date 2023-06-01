@@ -6,7 +6,6 @@ import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotFoundException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserNotFoundException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserUnderAgeException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.ValidationModelException;
 import org.springframework.http.HttpStatus;
@@ -31,7 +30,6 @@ import static com.pragma.powerup.usermicroservice.configuration.Constants.ROLE_N
 import static com.pragma.powerup.usermicroservice.configuration.Constants.ROLE_NOT_FOUND_MESSAGE;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.USER_ALREADY_EXISTS_MESSAGE;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.USER_NOT_FOUND_MESSAGE;
-import static com.pragma.powerup.usermicroservice.configuration.Constants.USER_UNDERAGE_NOT_ALLOWED_MESSAGE;
 import static com.pragma.powerup.usermicroservice.configuration.Constants.WRONG_CREDENTIALS_MESSAGE;
 
 @ControllerAdvice
@@ -66,12 +64,6 @@ public class ControllerAdvisor {
             MailAlreadyExistsException mailAlreadyExistsException) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, MAIL_ALREADY_EXISTS_MESSAGE));
-    }
-    @ExceptionHandler(UserUnderAgeException.class)
-    public ResponseEntity<Map<String, String>> handleUserUnderAgeException(
-            UserUnderAgeException userUnderAgeException) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Collections.singletonMap(RESPONSE_ERROR_MESSAGE_KEY, USER_UNDERAGE_NOT_ALLOWED_MESSAGE));
     }
     @ExceptionHandler(RoleNotAllowedForCreationException.class)
     public ResponseEntity<Map<String, String>> handleRoleNotAllowedForCreationException(

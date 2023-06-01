@@ -13,6 +13,7 @@ import java.util.List;
         unmappedSourcePolicy = ReportingPolicy.IGNORE)
 public interface UserEntityMapper {
 
+    @Mapping(target = "roleEntity", source = "roleModel")
     UserEntity toUserEntity(UserModel userModel);
 
     @Mapping(target = "roleModel", source = "roleEntity")

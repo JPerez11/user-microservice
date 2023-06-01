@@ -1,5 +1,6 @@
 package com.pragma.powerup.usermicroservice.domain.spi;
 
+import com.pragma.powerup.usermicroservice.domain.model.RoleModel;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 
 import java.util.List;
@@ -18,4 +19,10 @@ public interface UserPersistencePort {
     UserModel getUserById(Long id);
     // Method to register a new customer
     void registerUser(UserModel userModel);
+    // Method to valid exception
+    boolean userAlreadyExists(String documentNumber);
+    // Method to get role
+    RoleModel getRole();
+    // Method to get password encrypt
+    String getPasswordEncrypt(String password);
 }

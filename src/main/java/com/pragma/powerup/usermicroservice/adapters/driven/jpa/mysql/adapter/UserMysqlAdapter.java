@@ -1,16 +1,16 @@
 package com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.adapter;
 
 
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.actions.validations.ValidateAge;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.RoleEntity;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.entity.UserEntity;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserNotFoundException;
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.UserUnderAgeException;
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.RoleEntityMapper;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.mappers.UserEntityMapper;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.RoleRepository;
 import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.repositories.UserRepository;
+import com.pragma.powerup.usermicroservice.domain.model.RoleModel;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
 import lombok.RequiredArgsConstructor;
@@ -34,26 +34,12 @@ public class UserMysqlAdapter implements UserPersistencePort {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserEntityMapper userEntityMapper;
+    private final RoleEntityMapper roleEntityMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void createUser(UserModel userModel) {
-        UserEntity userEntity = userEntityMapper.toUserEntity(userModel);
-        if (ValidateAge.validateBirthDate(userEntity.getBirthdate())) {
-            throw new UserUnderAgeException();
-        }
-        if (userRepository.findByDocumentNumber(userEntity.getDocumentNumber()).isPresent()) {
-            throw new UserAlreadyExistsException();
-        }
-        userEntity.setRoleEntity(getRoleWithAuthentication(roleRepository));
-        if (userEntity.getRoleEntity().getId().equals(ADMIN_ROLE_ID))
-        {
-            throw new RoleNotAllowedForCreationException();
-        }
-
-        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
-        userRepository.save(userEntity);
-
+        userRepository.save(userEntityMapper.toUserEntity(userModel));
     }
 
     @Override
@@ -75,9 +61,6 @@ public class UserMysqlAdapter implements UserPersistencePort {
     @Override
     public void registerUser(UserModel userModel) {
         UserEntity userEntity = userEntityMapper.toUserEntity(userModel);
-        if (ValidateAge.validateBirthDate(userEntity.getBirthdate())) {
-            throw new UserUnderAgeException();
-        }
         if (userRepository.findByDocumentNumber(userEntity.getDocumentNumber()).isPresent()) {
             throw new UserAlreadyExistsException();
         }
@@ -93,4 +76,20 @@ public class UserMysqlAdapter implements UserPersistencePort {
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         userRepository.save(userEntity);
     }
+
+    @Override
+    public boolean userAlreadyExists(String documentNumber) {
+        return userRepository.existsByDocumentNumber(documentNumber);
+    }
+
+    @Override
+    public RoleModel getRole() {
+        return roleEntityMapper.toRoleModel(getRoleWithAuthentication(roleRepository));
+    }
+
+    @Override
+    public String getPasswordEncrypt(String password) {
+        return passwordEncoder.encode(password);
+    }
+
 }

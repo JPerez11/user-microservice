@@ -1,12 +1,15 @@
 package com.pragma.powerup.usermicroservice.domain.usecase;
 
+import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.domain.api.UserServicePort;
 import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
 import com.pragma.powerup.usermicroservice.domain.spi.UserPersistencePort;
 
 import java.util.List;
 
+import static com.pragma.powerup.usermicroservice.configuration.Constants.ADMIN_ROLE_ID;
 import static com.pragma.powerup.usermicroservice.domain.validations.UserValidation.userValidate;
 
 /**
@@ -25,7 +28,21 @@ public class UserUseCase implements UserServicePort {
 
     @Override
     public void createUser(UserModel userModel) {
+        if (userModel == null) {
+            throw new NullPointerException();
+        }
         userValidate(userModel);
+        if (userPersistencePort.userAlreadyExists(userModel.getDocumentNumber())) {
+            throw new UserAlreadyExistsException();
+        }
+        userModel.setRoleModel(userPersistencePort.getRole());
+        if (userModel.getRoleModel().getId().equals(ADMIN_ROLE_ID))
+        {
+            throw new RoleNotAllowedForCreationException();
+        }
+        userModel.setPassword(userPersistencePort.getPasswordEncrypt(
+                userModel.getPassword()
+        ));
         userPersistencePort.createUser(userModel);
     }
 
