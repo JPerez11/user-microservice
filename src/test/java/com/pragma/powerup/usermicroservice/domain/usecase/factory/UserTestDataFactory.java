@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 public class UserTestDataFactory {
 
-    public static RoleModel getRoleModelWithSetters() {
+    public static RoleModel getRoleAdminWithSetters() {
         RoleModel roleModel = new RoleModel();
 
         roleModel.setId(1L);
@@ -15,6 +15,15 @@ public class UserTestDataFactory {
         roleModel.setDescription("PLACE MANAGER");
         return  roleModel;
     }
+    public static RoleModel getRoleOwnerWithSetters() {
+        RoleModel roleModel = new RoleModel();
+
+        roleModel.setId(2L);
+        roleModel.setName("OWNER");
+        roleModel.setDescription("OWNER_ROLE");
+        return  roleModel;
+    }
+
     public static UserModel getUserModelWithSetters() {
         UserModel userModel = new UserModel();
         userModel.setId(1L);
@@ -25,7 +34,7 @@ public class UserTestDataFactory {
         userModel.setEmail("admin@gmail.com");
         userModel.setPassword("admin123");
         userModel.setBirthdate(LocalDate.of(2000, 1, 1));
-        userModel.setRoleModel(getRoleModelWithSetters());
+        userModel.setRoleModel(getRoleAdminWithSetters());
 
         return userModel;
     }
@@ -56,7 +65,7 @@ public class UserTestDataFactory {
         userModel.setEmail("test2@gmail.com");
         userModel.setPassword("test123");
         userModel.setBirthdate(LocalDate.of(2000, 1, 1));
-        userModel.setRoleModel(getRoleModelWithSetters());
+        userModel.setRoleModel(getRoleAdminWithSetters());
 
         return userModel;
     }

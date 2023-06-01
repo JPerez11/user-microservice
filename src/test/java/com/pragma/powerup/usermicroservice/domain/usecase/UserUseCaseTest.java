@@ -1,6 +1,10 @@
 package com.pragma.powerup.usermicroservice.domain.usecase;
 
 import com.pragma.powerup.usermicroservice.domain.exceptions.DomainException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotAllowedForCreationException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.UserNotFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.ValidationModelException;
 import com.pragma.powerup.usermicroservice.domain.model.RoleModel;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
@@ -10,12 +14,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,13 +40,30 @@ class UserUseCaseTest {
     void shouldCreateUser() {
         //Given
         UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+        RoleModel roleModel = UserTestDataFactory.getRoleOwnerWithSetters();
+        String passwordEncrypted = "$2a$10$G.2DHaPhPXfVzh/bn71KruzG/13XPjfwP6pRVOjeBGGCAEL0CU51W";
 
         //When
+        Mockito.when(userPersistencePort.userAlreadyExists(userModel.getDocumentNumber()))
+                .thenReturn(false);
+        Mockito.when(userPersistencePort.getRole()).thenReturn(roleModel);
+        userModel.setRoleModel(roleModel);
+        Mockito.when(userPersistencePort.getPasswordEncrypt(userModel.getPassword()))
+                .thenReturn(passwordEncrypted);
+        userModel.setPassword(passwordEncrypted);
         doNothing().when(userPersistencePort).createUser(userModel);
         userUseCase.createUser(userModel);
 
         //Then
         verify(userPersistencePort).createUser(userModel);
+    }
+
+    @Test
+    void shouldThrowNullPointerException() {
+        //Then
+        assertThrows(NullPointerException.class, () -> {
+            userUseCase.createUser(null);
+        });
     }
 
     @Test
@@ -56,40 +80,42 @@ class UserUseCaseTest {
     }
 
     @Test
-    void shouldGetUserById() {
+    void shouldThrowUserAlreadyExistsException() {
         //Given
         UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
 
         //When
-        when(userPersistencePort.getUserById(1L)).thenReturn(userModel);
-        userUseCase.getUserById(1L);
+        Mockito.when(userPersistencePort.userAlreadyExists(userModel.getDocumentNumber()))
+                .thenReturn(true);
 
         //Then
-        verify(userPersistencePort).getUserById(1L);
-        assertThrows(DomainException.class, () -> {
-            userUseCase.getUserById(10L);
+        assertThrows(UserAlreadyExistsException.class, () -> {
+            userUseCase.createUser(userModel);
         });
-
     }
 
     @Test
-    void shouldRegisterUser() {
+    void shouldThrowRoleNotAllowedForCreationException() {
         //Given
         UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+        RoleModel roleModel = UserTestDataFactory.getRoleAdminWithSetters();
 
         //When
-        doNothing().when(userPersistencePort).registerUser(userModel);
-        userUseCase.registerUser(userModel);
+        Mockito.when(userPersistencePort.userAlreadyExists(userModel.getDocumentNumber()))
+                .thenReturn(false);
+        Mockito.when(userPersistencePort.getRole()).thenReturn(roleModel);
+        userModel.setRoleModel(roleModel);
 
         //Then
-        verify(userPersistencePort).registerUser(userModel);
+        assertThrows(RoleNotAllowedForCreationException.class, () -> {
+            userUseCase.createUser(userModel);
+        });
     }
-
 
     @Test
     void shouldGetAllUsers() {
         //Given
-        RoleModel roleModel = UserTestDataFactory.getRoleModelWithSetters();
+        RoleModel roleModel = UserTestDataFactory.getRoleAdminWithSetters();
         UserModel userModel1 = UserTestDataFactory.getUserModelWithSetters();
         UserModel userModel2 = UserTestDataFactory.getOtherUserModelWithSetters();
 
@@ -98,7 +124,8 @@ class UserUseCaseTest {
         userModelList.add(userModel2);
 
         //When
-        when(userPersistencePort.getAllUsers(0)).thenReturn(userModelList);
+        Mockito.when(userPersistencePort.getAllUsers(0))
+                .thenReturn(userModelList);
         List<UserModel> result = userUseCase.getAllUsers(0);
 
         //Then
@@ -112,16 +139,62 @@ class UserUseCaseTest {
         assertEquals(userModelList.get(0).getPassword(), result.get(0).getPassword());
         assertEquals(userModelList.get(0).getRoleModel(), result.get(0).getRoleModel());
 
-        assertThrows(DomainException.class, () -> {
-            userUseCase.getAllUsers(10);
-        });
-
         assertEquals(roleModel.getId(), result.get(1).getRoleModel().getId());
         assertEquals(roleModel.getName(), result.get(1).getRoleModel().getName());
         assertEquals(roleModel.getDescription(), result.get(1).getRoleModel().getDescription());
 
         //Verify
-        verify(userPersistencePort).getAllUsers(0);
+        Mockito.verify(userPersistencePort).getAllUsers(0);
+    }
+
+    @Test
+    void shouldThrowNoDataFoundException() {
+        //When
+        Mockito.when(userPersistencePort.getAllUsers(10))
+                .thenReturn(Collections.emptyList());
+
+        //Then
+        assertThrows(NoDataFoundException.class, () -> {
+            userUseCase.getAllUsers(10);
+        });
+    }
+
+    @Test
+    void shouldGetUserById() {
+        //Given
+        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+
+        //When
+        Mockito.when(userPersistencePort.getUserById(1L)).thenReturn(userModel);
+        userUseCase.getUserById(1L);
+
+        //Then
+        Mockito.verify(userPersistencePort).getUserById(1L);
+
+    }
+
+    @Test
+    void shouldThrowUserNotFoundException() {
+        // When
+        Mockito.when(userPersistencePort.getUserById(1L)).thenReturn(null);
+
+        // Then
+        assertThrows(UserNotFoundException.class, () -> {
+            userUseCase.getUserById(1L);
+        });
+    }
+
+    @Test
+    void shouldRegisterUser() {
+        //Given
+        UserModel userModel = UserTestDataFactory.getUserModelWithSetters();
+
+        //When
+        doNothing().when(userPersistencePort).registerUser(userModel);
+        userUseCase.registerUser(userModel);
+
+        //Then
+        verify(userPersistencePort).registerUser(userModel);
     }
 
 }

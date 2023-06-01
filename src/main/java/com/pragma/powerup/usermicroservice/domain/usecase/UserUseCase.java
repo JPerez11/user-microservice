@@ -1,8 +1,8 @@
 package com.pragma.powerup.usermicroservice.domain.usecase;
 
-import com.pragma.powerup.usermicroservice.adapters.driven.jpa.mysql.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.domain.api.UserServicePort;
 import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotAllowedForCreationException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserNotFoundException;
 import com.pragma.powerup.usermicroservice.domain.model.UserModel;
