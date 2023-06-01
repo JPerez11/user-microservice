@@ -3,6 +3,7 @@ package com.pragma.powerup.usermicroservice.domain.usecase;
 import com.pragma.powerup.usermicroservice.domain.exceptions.MailAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotAllowedForCreationException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserNotFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.ValidationModelException;
@@ -57,9 +58,7 @@ class UserUseCaseTest {
     @Test
     void shouldThrowNullPointerException() {
         //Then
-        assertThrows(NullPointerException.class, () -> {
-            userUseCase.createUser(null);
-        });
+        assertThrows(NullPointerException.class, () -> userUseCase.createUser(null));
     }
 
     @Test
@@ -70,9 +69,7 @@ class UserUseCaseTest {
         //When
 
         //Then
-        assertThrows(ValidationModelException.class, () -> {
-            userUseCase.createUser(userModel);
-        });
+        assertThrows(ValidationModelException.class, () -> userUseCase.createUser(userModel));
     }
 
     @Test
@@ -85,9 +82,22 @@ class UserUseCaseTest {
                 .thenReturn(true);
 
         //Then
-        assertThrows(UserAlreadyExistsException.class, () -> {
-            userUseCase.createUser(userModel);
-        });
+        assertThrows(UserAlreadyExistsException.class, () -> userUseCase.createUser(userModel));
+    }
+    @Test
+    void shouldThrowRoleNotFoundException() {
+        //Given
+        UserModel userModel = UserTestDataFactory.getUserOwnerWithSetters();
+
+        //When
+        Mockito.when(userPersistencePort.userAlreadyExists(userModel.getDocumentNumber()))
+                .thenReturn(false);
+        Mockito.when(userPersistencePort.mailAlreadyExists(userModel.getEmail()))
+                .thenReturn(false);
+        Mockito.when(userPersistencePort.getRole()).thenReturn(null);
+
+        //Then
+        assertThrows(RoleNotFoundException.class, () -> userUseCase.createUser(userModel));
     }
 
     @Test
@@ -103,9 +113,7 @@ class UserUseCaseTest {
         userModel.setRoleModel(roleModel);
 
         //Then
-        assertThrows(RoleNotAllowedForCreationException.class, () -> {
-            userUseCase.createUser(userModel);
-        });
+        assertThrows(RoleNotAllowedForCreationException.class, () -> userUseCase.createUser(userModel));
     }
 
     @Test
@@ -150,9 +158,7 @@ class UserUseCaseTest {
                 .thenReturn(Collections.emptyList());
 
         //Then
-        assertThrows(NoDataFoundException.class, () -> {
-            userUseCase.getAllUsers(10);
-        });
+        assertThrows(NoDataFoundException.class, () -> userUseCase.getAllUsers(10));
     }
 
     @Test
@@ -175,9 +181,7 @@ class UserUseCaseTest {
         Mockito.when(userPersistencePort.getUserById(1L)).thenReturn(null);
 
         // Then
-        assertThrows(UserNotFoundException.class, () -> {
-            userUseCase.getUserById(1L);
-        });
+        assertThrows(UserNotFoundException.class, () -> userUseCase.getUserById(1L));
     }
 
     @Test
@@ -206,9 +210,7 @@ class UserUseCaseTest {
     @Test
     void shouldThrowNullPointerExceptionInRegisterUser() {
         //Then
-        assertThrows(NullPointerException.class, () -> {
-            userUseCase.registerUser(null);
-        });
+        assertThrows(NullPointerException.class, () -> userUseCase.registerUser(null));
     }
 
     @Test
@@ -217,9 +219,7 @@ class UserUseCaseTest {
         UserModel userModel = UserTestDataFactory.getUserModelEmpty();
 
         //Then
-        assertThrows(ValidationModelException.class, () -> {
-            userUseCase.registerUser(userModel);
-        });
+        assertThrows(ValidationModelException.class, () -> userUseCase.registerUser(userModel));
     }
 
     @Test
@@ -232,9 +232,7 @@ class UserUseCaseTest {
                 .thenReturn(true);
 
         //Then
-        assertThrows(UserAlreadyExistsException.class, () -> {
-            userUseCase.registerUser(userModel);
-        });
+        assertThrows(UserAlreadyExistsException.class, () -> userUseCase.registerUser(userModel));
     }
     @Test
     void shouldThrowMailAlreadyExistsExceptionInRegisterUser() {
@@ -246,9 +244,7 @@ class UserUseCaseTest {
                 .thenReturn(true);
 
         //Then
-        assertThrows(MailAlreadyExistsException.class, () -> {
-            userUseCase.registerUser(userModel);
-        });
+        assertThrows(MailAlreadyExistsException.class, () -> userUseCase.registerUser(userModel));
     }
 
 }

@@ -4,6 +4,7 @@ import com.pragma.powerup.usermicroservice.domain.api.UserServicePort;
 import com.pragma.powerup.usermicroservice.domain.exceptions.MailAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.NoDataFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotAllowedForCreationException;
+import com.pragma.powerup.usermicroservice.domain.exceptions.RoleNotFoundException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserAlreadyExistsException;
 import com.pragma.powerup.usermicroservice.domain.exceptions.UserNotFoundException;
 import com.pragma.powerup.usermicroservice.domain.model.RoleModel;
@@ -32,14 +33,12 @@ public class UserUseCase implements UserServicePort {
 
     @Override
     public void createUser(UserModel userModel) {
-        if (userModel == null) {
-            throw new NullPointerException();
+        validUser(userModel);
+        RoleModel roleModel = userPersistencePort.getRole();
+        if (roleModel == null) {
+            throw new RoleNotFoundException();
         }
-        userValidate(userModel);
-        if (userPersistencePort.userAlreadyExists(userModel.getDocumentNumber())) {
-            throw new UserAlreadyExistsException();
-        }
-        userModel.setRoleModel(userPersistencePort.getRole());
+        userModel.setRoleModel(roleModel);
         if (userModel.getRoleModel().getId().equals(ADMIN_ROLE_ID))
         {
             throw new RoleNotAllowedForCreationException();
@@ -70,6 +69,15 @@ public class UserUseCase implements UserServicePort {
 
     @Override
     public void registerUser(UserModel userModel) {
+        validUser(userModel);
+        RoleModel roleModel = new RoleModel();
+        roleModel.setId(CUSTOMER_ROLE_ID);
+        userModel.setRoleModel(roleModel);
+        userModel.setPassword(userPersistencePort.getPasswordEncrypt(userModel.getPassword()));
+        userPersistencePort.registerUser(userModel);
+    }
+
+    private void validUser(UserModel userModel) {
         if (userModel == null) {
             throw new NullPointerException();
         }
@@ -80,10 +88,6 @@ public class UserUseCase implements UserServicePort {
         if (userPersistencePort.mailAlreadyExists(userModel.getEmail())) {
             throw new MailAlreadyExistsException();
         }
-        RoleModel roleModel = new RoleModel();
-        roleModel.setId(CUSTOMER_ROLE_ID);
-        userModel.setRoleModel(roleModel);
-        userModel.setPassword(userPersistencePort.getPasswordEncrypt(userModel.getPassword()));
-        userPersistencePort.registerUser(userModel);
     }
+
 }
