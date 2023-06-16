@@ -36,7 +36,7 @@ public class UserRestController {
 
     private final UserHandler userHandler;
 
-    @Secured({"ADMIN", "OWNER"})
+    @Secured({Constants.ADMIN_ROLE, Constants.OWNER_ROLE})
     @Operation(summary = "Add a new user",
             responses = {
                     @ApiResponse(responseCode = "201", description = "User created",
@@ -57,7 +57,7 @@ public class UserRestController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Collections.singletonMap(Constants.RESPONSE_MESSAGE_KEY, Constants.USER_CREATED_MESSAGE));
     }
-    @Secured({"ADMIN"})
+    @Secured({Constants.ADMIN_ROLE, Constants.OWNER_ROLE})
     @Operation(summary = "Get all users",
             responses = {
                     @ApiResponse(responseCode = "200", description = "All users returned",
@@ -71,7 +71,7 @@ public class UserRestController {
             @Parameter(description = "Number of the page to list providers") @RequestParam int page) {
         return ResponseEntity.ok(userHandler.getAllUsers(page));
     }
-    @Secured({"ADMIN"})
+    @Secured({Constants.ADMIN_ROLE, Constants.OWNER_ROLE})
     @Operation(summary = "Get a user",
             responses = {
                     @ApiResponse(responseCode = "200", description = "User returned",

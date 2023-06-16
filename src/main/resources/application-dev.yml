@@ -8,6 +8,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    open-in-view: off
   datasource:
     url: jdbc:mysql://localhost:3306/users_microservice?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: root
