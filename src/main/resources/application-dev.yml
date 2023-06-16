@@ -4,14 +4,15 @@ server:
 spring:
   application:
     name: user-microservice
-  datasource:
-    url: jdbc:mysql://localhost:3306/users_microservice
-    username: root
-    password: admin
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/users_microservice?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    username: root
+    password: admin
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 management:
   endpoints:
