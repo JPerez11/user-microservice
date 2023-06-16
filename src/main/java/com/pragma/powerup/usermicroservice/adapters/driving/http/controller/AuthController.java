@@ -35,7 +35,7 @@ public class AuthController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Session token",
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = UserResponseDto.class))),
+                                    schema = @Schema(implementation = JwtResponseDto.class))),
                     @ApiResponse(responseCode = "401", description = "Wrong credentials",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(ref = "#/components/schemas/Error")))})
