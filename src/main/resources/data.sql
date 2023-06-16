@@ -1,5 +1,5 @@
 -- Insert role ADMIN --
-INSERT INTO roles (id,
+INSERT INTO users_microservice.roles (id,
                    description,
                    name)
 values (1,
@@ -7,7 +7,7 @@ values (1,
         'ADMIN');
 
 -- Insert role OWNER --
-INSERT INTO roles (id,
+INSERT INTO users_microservice.roles (id,
                    description,
                    name)
 values (2,
@@ -15,7 +15,7 @@ values (2,
         'OWNER');
 
 -- Insert role EMPLOYEE --
-INSERT INTO roles (id,
+INSERT INTO users_microservice.roles (id,
                    description,
                    name)
 values (3,
@@ -23,7 +23,7 @@ values (3,
         'EMPLOYEE');
 
 -- Insert role CUSTOMER --
-INSERT INTO roles (id,
+INSERT INTO users_microservice.roles (id,
                    description,
                    name)
 values (4,
@@ -31,7 +31,7 @@ values (4,
         'CUSTOMER');
 
 -- Insert user ADMIN --
-INSERT INTO users (id,
+INSERT INTO users_microservice.users (id,
                    birthdate,
                    document_number,
                    email,
@@ -53,7 +53,7 @@ values (1,
 -- insert user OWNER --
 -- This insert is if you want to create the first owner from here,
 -- otherwise you can create them from the endpoint --
-INSERT INTO users (id,
+INSERT INTO users_microservice.users (id,
                    birthdate,
                    document_number,
                    email,
@@ -74,14 +74,14 @@ values (2,
 
 -- Select all user --
 SELECT *
-FROM users;
+FROM users_microservice.users;
 
 -- Select user and role name --
 SELECT u.first_name, u.document_number, r.name
-FROM users u
-INNER JOIN roles r
+FROM users_microservice.users u
+INNER JOIN users_microservice.roles r
 ON u.id_role = r.id;
 
 -- Select all roles --
 SELECT *
-FROM roles;
+FROM users_microservice.roles;
