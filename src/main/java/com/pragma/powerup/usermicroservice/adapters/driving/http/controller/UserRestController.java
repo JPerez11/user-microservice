@@ -71,7 +71,7 @@ public class UserRestController {
             @Parameter(description = "Number of the page to list providers") @RequestParam int page) {
         return ResponseEntity.ok(userHandler.getAllUsers(page));
     }
-    @Secured({Constants.ADMIN_ROLE, Constants.OWNER_ROLE})
+    @Secured({Constants.ADMIN_ROLE, Constants.OWNER_ROLE, Constants.EMPLOYEE_ROLE, Constants.CUSTOMER_ROLE})
     @Operation(summary = "Get a user",
             responses = {
                     @ApiResponse(responseCode = "200", description = "User returned",
